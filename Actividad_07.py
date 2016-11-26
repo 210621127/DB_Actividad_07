@@ -138,6 +138,7 @@ class MenuContatos():
         print("=================================================")
         input("\n\tPresione una tecla paracontinuar...")
 
+
     def menu(self,user,db):
 
         opc = -1
@@ -146,7 +147,7 @@ class MenuContatos():
             print("\n\t* * * CONTACTOS * * * \n")
             print("\n\t1) Mostrar contactos ") # Muestra contactos - con id-
             print("\t2) Agregar nuevo contacto") #Agrega un nuevo contacto -correo-
-            print("\t3) Eliminar contacto (NO)") # Elimina de la base de datos (submenu)
+            print("\t3) Eliminar contacto") # Elimina de la base de datos (submenu)
             print("\t4) Modificar contacto (NO)") # Modifica un contacto (submenu)
             print("\t0) Salir")
             opc = input ("\n\tIngrese una opcion: ")
@@ -459,21 +460,62 @@ class MenuCorreoEnviado():
             elif opc == '1':
                 pass
             elif opc == '2':
-                pass
+                self.eliminar(user,cursor,e)
+
+                break
             elif opc == '3':
                 pass
             else:
                 print("\n\tIngrese una de las opciones...")
                 input("\n\tPresione una tecla para continuar...")
 
-    def Recuperar(self,user,cursor):
-        pass
+    def recuperar(self,user,cursor):
+        while True:
+            print("\n\t¿Desea recuperar todos los eliminados? \n\t1) SI\n\t2) NO")
+            opc = input("\n\tSeleccione una opcion: ")
+            if opc.isdigit():
+                opc = int(opc)
+                if opc == 1:
+                    cursor.execute('UPDATE CORREO set eliminado = ? WHERE \
+                        correo_id = ?',(True,e.correo_id,))
+                    print("\n\tRecuperacion exitosa!")
+                    input("\n\tPresione una tecla para continuar...")
+                    break
+                elif opc == 2:
+                    print("\n\tRecuperacion abortada!!!")
+                    input("\n\tPresione una tecla para continuar...")
+                    return
+                else:
+                    input("\n\t(!) Ingrese una de las opciones!")
+            else:
+                print("\n\t(!) Ingrese solo numeros!!")
+    def eliminar(self,user,cursor,e):
+        while True:
+            print("\n\tSeguro que desea eliminar? \n\t1) SI\n\t2) NO")
+            opc = input("\n\tSeleccione una opcion: ")
+            if opc.isdigit():
+                opc = int(opc)
+                if opc == 1:
+                    cursor.execute('UPDATE CORREO set eliminado = ? WHERE \
+                        correo_id = ?',(True,e.correo_id,))
+                    print("\n\tEliminacion exitosa!")
+                    input("\n\tPresione una tecla para continuar...")
+                    break
+                elif opc == 2:
+                    print("\n\tEliminacion abortada!!!")
+                    input("\n\tPresione una tecla para continuar...")
+                    return
+                else:
+                    input("\n\t(!) Ingrese una de las opciones!")
+            else:
+                print("\n\t(!) Ingrese solo numeros!!")
 
 
     def menu(self,user,db):
         cursor = db.cursor()
         e = Correo(None)
         while True:
+            db.commit()
             os.system("clear")
             print("\n\t* * * CORREO ENVIADO * * *\n")
             print("\t1) Recientes")      #Mostrar correos enviados de 5 en 5
@@ -500,7 +542,6 @@ class MenuCorreoEnviado():
                 elif opc == 6:
                     pass
                 elif opc == 0:
-                    db.commit()
                     break
                 else:
                     print("\n\t(!) Seleccione una de las opciones del menu!!!")
