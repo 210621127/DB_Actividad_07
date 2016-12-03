@@ -45,7 +45,6 @@ class Contacto():
               "\n\tEmail: "+str(self.email)+\
               "\n\tNombre: "+str(self.apellidoPatC)+","+str(self.nombresC)
 
-
 class Correo():
     def __init__(self, data):
         self.correo_id = data
@@ -68,8 +67,6 @@ class Correo():
             +"\n\tTexto:\n\t------------------------------\n\t"+str(self.texto)\
             +"\n\t------------------------------"\
             +"\n\tAdjunto: "+str(self.adjunto)
-
-
 
 class MenuContatos():
     def __init__(self):
@@ -182,7 +179,7 @@ class MenuCorreoNuevo():
             os.system("clear")
             print("\n\t* * * CORREO NUEVO * * *\n")
 
-            #ahora = time.strftime("%c")
+            print("\n\tPresione solo < ENTER > par regresar....\n")
             c.fecha = time.strftime("%d/%m/%Y")
             c.hora = time.strftime("%X")
             print("\tFecha: ", c.fecha)
@@ -192,14 +189,13 @@ class MenuCorreoNuevo():
             print("\tDe:    ",c.de)
 
             c.para = input("\tPara:  ")
-            while len(c.para) < 1:
+            if len(c.para) == 0:
+                return
+            while len(c.para) < 6:
                 c.para = input("\tIngrese un correo valido: ")
-            rows = cursor.execute("SELECT * FROM CONTACTO WHERE email = ? AND \
+            cursor.execute("SELECT * FROM CONTACTO WHERE email = ? AND \
                 registra = ?", (c.para, u.correo))
-            for row in rows:
-                c.para_id = row[0]
-
-            if  c.para_id != None:
+            if cursor.fetchone() != None:
                 break
             else:
                 print("\n\t(!) El contacto que escribio no esta registrado...")
@@ -477,7 +473,7 @@ class MenuCorreoEnviado():
                 opc = int(opc)
                 if opc == 1:
                     cursor.execute('UPDATE CORREO set eliminado = ? WHERE \
-                        correo_id = ?',(True,e.correo_id,))
+                        de = ?',(False,user.correo))
                     print("\n\tRecuperacion exitosa!")
                     input("\n\tPresione una tecla para continuar...")
                     break
@@ -510,6 +506,34 @@ class MenuCorreoEnviado():
             else:
                 print("\n\t(!) Ingrese solo numeros!!")
 
+    def vaciaPapelera(self,user,cursor):
+        c = cursor
+        u = user
+        while True:
+            print("\n\tSeguro que desea vaciar la papelera? \n\t1) SI\n\t2) NO")
+            opc = input("\n\tSeleccione una opcion: ")
+            if opc.isdigit():
+                opc = int(opc)
+                if opc == 1:
+                    rows = c.execute('SELECT * FROM CORREO set eliminado = ? WHERE \
+                        de = ?',(True,u.correo,))
+                    for row in rows:
+                        c.execute("INSERT INTO CORREO_E(correo_id,fecha,hora,\
+                        de,para,para,id)", ())
+
+
+
+                    print("\n\tEliminacion exitosa!")
+                    input("\n\tPresione una tecla para continuar...")
+                    break
+                elif opc == 2:
+                    print("\n\tEliminacion abortada!!!")
+                    input("\n\tPresione una tecla para continuar...")
+                    return
+                else:
+                    input("\n\t(!) Ingrese una de las opciones!")
+            else:
+                print("\n\t(!) Ingrese solo numeros!!")
 
     def menu(self,user,db):
         cursor = db.cursor()
@@ -538,7 +562,7 @@ class MenuCorreoEnviado():
                 elif opc == 4:
                     self.busTexto(user,cursor)
                 elif opc == 5:
-                    pass
+                    self.recuperar(user,cursor)
                 elif opc == 6:
                     pass
                 elif opc == 0:
