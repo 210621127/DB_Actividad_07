@@ -52,7 +52,6 @@ class Correo():
         self.hora = data
         self.de = data
         self.para = data
-        self.para_id = data
         self.texto = data
         self.asunto = data
         self.adjunto = data
@@ -224,13 +223,11 @@ class MenuCorreoNuevo():
             c.adjunto = None
 
         c.eliminado = False
-
-        c.fecha = time.strftime("%x")
         c.hora = time.strftime("%X")
 
         cursor.execute("INSERT INTO CORREO (correo_id,fecha,hora,de,para,\
-        para_id,texto,asunto,adjunto,eliminado) VALUES (?,?,?,?,?,?,?,?,?,?)",\
-        (c.correo_id,c.fecha,c.hora,c.de,c.para,c.para_id,c.texto,c.asunto,\
+        texto,asunto,adjunto,eliminado) VALUES (?,?,?,?,?,?,?,?,?)",\
+        (c.correo_id,c.fecha,c.hora,c.de,c.para,c.texto,c.asunto,\
         c.adjunto,c.eliminado))
 
         input("\n\tCorreo guardado exitosamente!")
@@ -258,9 +255,9 @@ class MenuCorreoEnviado():
             e.fecha = row [1]
             e.hora = row [2]
             e.para = row [4]
-            e.texto = row [6]
-            e.asunto = row [7]
-            e.adjunto = row [8]
+            e.texto = row [5]
+            e.asunto = row [6]
+            e.adjunto = row [7]
             print(e)
             print("=========================================")
             i += 1
@@ -292,13 +289,14 @@ class MenuCorreoEnviado():
             e.fecha = row [1]
             e.hora = row [2]
             e.para = row [4]
-            e.texto = row [6]
-            e.asunto = row [7]
-            e.adjunto = row [8]
+            e.texto = row [5]
+            e.asunto = row [6]
+            e.adjunto = row [7]
             print(e)
             print("=========================================")
         if flag == False:
             print("\n\t(!) No existen correos enviados con la fecha dada!!")
+            input("\n\tPresione una tecla para continuar...")
         else:
             self.subMenu(user,cursor)
 
@@ -335,9 +333,9 @@ class MenuCorreoEnviado():
             e.fecha = row [1]
             e.hora = row [2]
             e.para = row [4]
-            e.texto = row [6]
-            e.asunto = row [7]
-            e.adjunto = row [8]
+            e.texto = row [5]
+            e.asunto = row [6]
+            e.adjunto = row [7]
             print(e)
             print("=========================================")
 
@@ -370,9 +368,9 @@ class MenuCorreoEnviado():
             e.fecha = row [1]
             e.hora = row [2]
             e.para = row [4]
-            e.texto = row [6]
-            e.asunto = row [7]
-            e.adjunto = row [8]
+            e.texto = row [5]
+            e.asunto = row [6]
+            e.adjunto = row [7]
             print(e)
             print("=========================================")
 
@@ -387,9 +385,9 @@ class MenuCorreoEnviado():
             e.fecha = row [1]
             e.hora = row [2]
             e.para = row [4]
-            e.texto = row [6]
-            e.asunto = row [7]
-            e.adjunto = row [8]
+            e.texto = row [5]
+            e.asunto = row [6]
+            e.adjunto = row [7]
             print(e)
             print("=========================================")
 
@@ -404,9 +402,9 @@ class MenuCorreoEnviado():
             e.fecha = row [1]
             e.hora = row [2]
             e.para = row [4]
-            e.texto = row [6]
-            e.asunto = row [7]
-            e.adjunto = row [8]
+            e.texto = row [5]
+            e.asunto = row [6]
+            e.adjunto = row [7]
             print(e)
             print("=========================================")
 
@@ -419,8 +417,13 @@ class MenuCorreoEnviado():
     def subMenu(self,user,cursor):
         flag = False
         while True:
+            print("\n\tPresione < ENTER > para regresar...\n")
             id = input("\n\tIntroduzca el ID del correo para seleccionar uno: ")
-            if id.isdigit():
+
+            if len(id) == 0:
+                return
+
+            elif id.isdigit():
                 rows = cursor.execute('SELECT* FROM CORREO WHERE correo_id = ?\
                 AND eliminado = ?',(id,False))
                 for row in rows:
@@ -432,9 +435,9 @@ class MenuCorreoEnviado():
                     e.fecha = row [1]
                     e.hora = row [2]
                     e.para = row [4]
-                    e.texto = row [6]
-                    e.asunto = row [7]
-                    e.adjunto = row [8]
+                    e.texto = row [5]
+                    e.asunto = row [6]
+                    e.adjunto = row [7]
                     print("=========================================")
                 if flag == False:
                     print("\n\t(!) EL ID ingresado no existe!!")
@@ -507,6 +510,7 @@ class MenuCorreoEnviado():
                 print("\n\t(!) Ingrese solo numeros!!")
 
     def vaciaPapelera(self,user,cursor):
+        lista = []
         c = cursor
         u = user
         while True:
@@ -515,13 +519,18 @@ class MenuCorreoEnviado():
             if opc.isdigit():
                 opc = int(opc)
                 if opc == 1:
-                    rows = c.execute('SELECT * FROM CORREO set eliminado = ? WHERE \
-                        de = ?',(True,u.correo,))
+                    rows = c.execute('SELECT * FROM CORREO WHERE eliminado = ? \
+                    AND de = ?',(True,u.correo,))
                     for row in rows:
+                        print(row)
+                        lista.append(row)
+                    for row in lista:
                         c.execute("INSERT INTO CORREO_E(correo_id,fecha,hora,\
-                        de,para,para,id)", ())
-
-
+                        de,para,texto,asunto,adjunto,eliminado) VALUES (?,?,?,\
+                        ?,?,?,?,?,?)",(None,row[1],row[2],row[3],row[4],\
+                        row[5],row[6],row[7],row[8],))
+                        c.execute("DELETE FROM CORREO WHERE correo_id = ?",\
+                        (row[0],))
 
                     print("\n\tEliminacion exitosa!")
                     input("\n\tPresione una tecla para continuar...")
@@ -564,7 +573,7 @@ class MenuCorreoEnviado():
                 elif opc == 5:
                     self.recuperar(user,cursor)
                 elif opc == 6:
-                    pass
+                    self.vaciaPapelera(user,cursor)
                 elif opc == 0:
                     break
                 else:
