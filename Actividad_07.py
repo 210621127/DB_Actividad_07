@@ -134,9 +134,104 @@ class MenuContatos():
         print("=================================================")
         input("\n\tPresione una tecla paracontinuar...")
 
+    def submenu(self,u,c):
+        self.list = []
+        i = 0
+        print("\n\t1) Buscar\n\t2) Indice\n\t0) Salir")
+        while True:
+            opc = input("\n\tSeleccione una opcion: ")
+            if opc.isdigit():
+                opc = int(opc)
+                if opc == 1 or opc == 2 or opc == 0:
+                    break
+            else:
+                print("\n\t(!) Ingrese solo digitos!!")
 
+        if opc == 1:
+            tmp = input("\n\tIngrese un email para buscar: ")
+            if len(tmp) == 0:
+                return None
+            else:
+                c.execute("SELECT * FROM CONTACTO WHERE email = ? AND \
+                registra = ?",(tmp,u.correo,))
+                row = c.fetchone()
+                if row != None:
+                    return row
+                else:
+                    return None
+        elif opc == 2:
+            print("\n\tIndice")
+            rows = c.execute("SELECT * FROM CONTACTO WHERE registra = ?",\
+            (u.correo))
+            for row in rows:
+                i += 1
+                self.list.append(row[1])
+                print("\t",i,") "+self.list[i-1])
+            while True:
+                selec = input("\n\tSeleccione un contacto: ")
+                if selec.isdigit():
+                    selec = int(selec)
+                    if selec < 1 or selec > i:
+                        print("\n\t(!) Seleccione un numero de la lista!")
+                    else:
+                        break
+                else:
+                    print("\n\t(!) Ingrese unicamente numeros!")
+            tmp = self.list[selec-1]
+            c.execute("SELECT * FROM CONTACTO WHERE email = ?",(tmp,))
+            row = c.fetchone()
+            if row != None:
+                return row
+            else:
+                return None
+        elif opc == 0:
+            return 0
+        else:
+            print("\n\t(!) Ingrese alguna de las opciones del menu!!")
+
+
+    def elimina(self,u,c):
+
+        while True:
+            con = Contacto(None)
+            os.system("clear")
+
+            print("\n\t* * * ELIMINA CONTACTO * * *")
+            row = self.submenu(u,c)
+            if row == None:
+                print("\n\t(!) No se encontro el contacto")
+                input("\n\tPresione una tecla para continuar...")
+                break
+            elif row == 0:
+                return
+            else:
+                con.contacto_id = row[0]
+                con.email = row[1]
+                con.apellidoPatC = row[3]
+                con.apellidoMatC = row[4]
+                con.nombresC = row[5]
+                print("\n\t")
+                print(con)
+                print("\n\tConfirmacion para borrar\n\n\t1) SI\n\t2) NO")
+                while True:
+                    opc = input("\n\tSeleccione una opcion: ")
+                    if opc.isdigit():
+                        if opc == '1':
+                            c.execute("DELETE FROM CONTACTO WHERE contacto_id =\
+                            ?",(con.contacto_id,))
+                            print("\n\tEliminacion exitosa!")
+                            input("\n\tPresione una tecla para continuar...")
+                            break
+                        elif opc == '2':
+                            os.system("clear")
+                            print("\n\tEliminacion abortada!!!")
+                            input("\n\tPresione una tecla para continuar...")
+                            break
+                    else:
+                        print("\n\t(!)Ingrese solo numeros!")
+                break
     def menu(self,user,db):
-
+        cursor = db.cursor()
         opc = -1
         while True:
             os.system("clear")
@@ -155,7 +250,7 @@ class MenuContatos():
                     os.system("clear")
                     self.agregar(user,db)
                 elif opc == 3:
-                    pass
+                    self.elimina(user,cursor)
                 elif opc == 4:
                     pass
                 elif opc == 0:
@@ -522,7 +617,6 @@ class MenuCorreoEnviado():
                     rows = c.execute('SELECT * FROM CORREO WHERE eliminado = ? \
                     AND de = ?',(True,u.correo,))
                     for row in rows:
-                        print(row)
                         lista.append(row)
                     for row in lista:
                         c.execute("INSERT INTO CORREO_E(correo_id,fecha,hora,\
